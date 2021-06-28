@@ -1,0 +1,125 @@
+From 7d4ec436f7f61a76a35b024d49c434996949d181 Mon Sep 17 00:00:00 2001
+From: Abel Aghorighor <52415319+aaghorighor@users.noreply.github.com>
+Date: Sun, 27 Jun 2021 18:59:24 +0100
+Subject: [PATCH] my changes
+
+---
+ .../GildedRose.Application.csproj             |  7 +++++
+ .../src/GildedRose.Console/Program.cs         | 28 ++++++-------------
+ .../src/GildedRose.Console/Shop.cs            |  6 ++--
+ .../src/GildedRose.Console/packages.config    |  2 ++
+ 4 files changed, 21 insertions(+), 22 deletions(-)
+
+diff --git a/GuildedRoseCode/src/GildedRose.Console/GildedRose.Application.csproj b/GuildedRoseCode/src/GildedRose.Console/GildedRose.Application.csproj
+index f57ba4b..e2979b5 100644
+--- a/GuildedRoseCode/src/GildedRose.Console/GildedRose.Application.csproj
++++ b/GuildedRoseCode/src/GildedRose.Console/GildedRose.Application.csproj
+@@ -37,6 +37,9 @@
+     <Reference Include="MarkdownLog, Version=0.9.3.36, Culture=neutral, processorArchitecture=MSIL">
+       <HintPath>..\..\packages\MarkdownLog.0.9.3\lib\portable-net45+sl50+MonoAndroid10+MonoTouch10\MarkdownLog.dll</HintPath>
+     </Reference>
++    <Reference Include="StructureMap, Version=4.7.0.0, Culture=neutral, processorArchitecture=MSIL">
++      <HintPath>..\..\packages\StructureMap.4.7.1\lib\net45\StructureMap.dll</HintPath>
++    </Reference>
+     <Reference Include="System" />
+     <Reference Include="System.Core" />
+     <Reference Include="System.Xml.Linq" />
+@@ -46,7 +49,11 @@
+     <Reference Include="System.Xml" />
+   </ItemGroup>
+   <ItemGroup>
++    <Compile Include="IItemBuilder.cs" />
++    <Compile Include="Boostrap.cs" />
++    <Compile Include="IShop.cs" />
+     <Compile Include="Item.cs" />
++    <Compile Include="ItemBuilder.cs" />
+     <Compile Include="Shop.cs" />
+     <Compile Include="Program.cs" />
+     <Compile Include="Properties\AssemblyInfo.cs" />
+diff --git a/GuildedRoseCode/src/GildedRose.Console/Program.cs b/GuildedRoseCode/src/GildedRose.Console/Program.cs
+index 176ae71..8ed8a26 100644
+--- a/GuildedRoseCode/src/GildedRose.Console/Program.cs
++++ b/GuildedRoseCode/src/GildedRose.Console/Program.cs
+@@ -1,39 +1,29 @@
+ ﻿using System;
+ using System.Collections.Generic;
+ using MarkdownLog;
++using StructureMap;
+ 
+ namespace GildedRose.Application
+ {
+     public static class Program
+-    {
+-        public static IList<Item> Items;
+-
++    {       
+         static void Main(string[] args)
+         {
+             Console.WriteLine("OMGHAI!");
+ 
+-            Shop.Items = new List<Item>
+-                {
+-                    new Item { Name = "+5 Dexterity Vest", SellIn = 10, Quality = 20 },
+-                    new Item { Name = "Aged Brie", SellIn = 2, Quality = 0 },
+-                    new Item { Name = "Elixir of the Mongoose", SellIn = 5, Quality = 7 },
+-                    new Item { Name = "Sulfuras, Hand of Ragnaros", SellIn = 0, Quality = 80 },
+-                    new Item
+-                        {
+-                            Name = "Backstage passes to a TAFKAL80ETC concert",
+-                            SellIn = 15,
+-                            Quality = 20
+-                        },
+-                    new Item { Name = "Conjured Mana Cake", SellIn = 3, Quality = 6 }
+-                };
++            var container = Container.For<Boostrap>();
++            var itemBuilder = container.GetInstance<IItemBuilder>();
++            var shop = container.GetInstance<IShop>();
++
++            shop.Items = itemBuilder.Items();
+ 
+             while (true)
+             {
+                 Console.Clear();
+ 
+-                Shop.UpdateQuality();
++                shop.UpdateQuality();
+ 
+-                Console.WriteLine(Shop.Items.ToMarkdownTable());
++                Console.WriteLine(shop.Items.ToMarkdownTable());
+                 
+                 Console.ReadKey();
+             }
+diff --git a/GuildedRoseCode/src/GildedRose.Console/Shop.cs b/GuildedRoseCode/src/GildedRose.Console/Shop.cs
+index 47f4ffa..929c76a 100644
+--- a/GuildedRoseCode/src/GildedRose.Console/Shop.cs
++++ b/GuildedRoseCode/src/GildedRose.Console/Shop.cs
+@@ -2,11 +2,11 @@
+ 
+ namespace GildedRose.Application
+ {
+-    public static class Shop
++    public class Shop : IShop
+     {
+-        public static IList<Item> Items;
++        public IList<Item> Items { get; set; }
+ 
+-        public static void UpdateQuality()
++        public void UpdateQuality()
+         {
+             for (var i = 0; i < Items.Count; i++)
+             {
+diff --git a/GuildedRoseCode/src/GildedRose.Console/packages.config b/GuildedRoseCode/src/GildedRose.Console/packages.config
+index 7aeb3b5..a97ba1c 100644
+--- a/GuildedRoseCode/src/GildedRose.Console/packages.config
++++ b/GuildedRoseCode/src/GildedRose.Console/packages.config
+@@ -2,4 +2,6 @@
+ <packages>
+   <package id="GitVersionTask" version="3.6.5" targetFramework="net45" developmentDependency="true" />
+   <package id="MarkdownLog" version="0.9.3" targetFramework="net45" />
++  <package id="StructureMap" version="4.7.1" targetFramework="net45" />
++  <package id="System.Reflection.Emit.Lightweight" version="4.3.0" targetFramework="net45" />
+ </packages>
+\ No newline at end of file
+-- 
+2.27.0.windows.1
+
